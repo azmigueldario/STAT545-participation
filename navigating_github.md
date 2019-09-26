@@ -1,11 +1,21 @@
-## **GitHub Classroom** (Organization)
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 
-https://github.com/STAT545-UBC-hw-2019-20
 
-## My account's **_Webpage_**
+# **GitHub Classroom** \
+#### (Organization repo)
 
-https://github.com/azmigueldario
-My account 
+  Link is [here](
+https://github.com/STAT545-UBC-hw-2019-20)
 
-https://github.com/azmigueldario/STAT545-participation.git
-My STAT 545A participation repo
+### My account's URL
+
+https://github.com/azmigueldario \
+My account  [__Webpage link__] (https://github.com/azmigueldario) \
+\
+https://github.com/azmigueldario/STAT545-participation.git \
+My STAT 545A participation repo  __Webpage__
+
