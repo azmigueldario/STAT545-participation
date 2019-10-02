@@ -1,0 +1,198 @@
+---
+title: "02102019-Data visualization(ggplot)_R for data science"
+author: "MDP"
+date: "10/2/2019"
+output:  
+  html_document:
+    theme: flatly
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Package ggplot2 uses **"grammar of graphics"** to describe and build graphs
+
+Terms include data, mapping of object to axis and variables, aestethics of graph (geom) and statistical transformation (stat)
+
+```{r, message=FALSE, warning=FALSE}
+
+require(tidyverse)
+
+#examples 
+
+ggplot() +
+layer(
+data = diamonds, mapping = aes(x = carat, y = price),
+geom = "point", stat = "identity", position = "identity"
+) +
+scale_y_continuous() +
+scale_x_continuous() +
+coord_cartesian()
+
+
+# qplot is a simplified version of ggplot2 using some default inputs
+
+qplot(carat, price, data = diamonds)
+
+
+```
+
+If a function from a specific package needs to be called, do it in the form ` package::function() `
+
+
+## mpg dataset examples
+
+```{r, message=FALSE, warning=FALSE}
+
+ggplot2::mpg
+
+
+```
+
+```{r, eval=FALSE}
+?mpg
+```
+
+**Displ** variable is engine size
+**hwy** is efficiency in galons
+
+```{r}
+
+ggplot(data=mpg) +
+  geom_point(mapping = aes(x=displ, y=hwy))
+
+```
+
+First argument (layer) to `ggplot()` is the **Data** argument in the graph grammar. It would be an empty graph without more parameters. 
+
+`geom_point` specifies that aestethics will be points, like shown in the  scatterplot. Each `geom_function` needs a `mapping=aes()` argument to specify variables to axis like x or y. 
+
+R for data science template for graphs:
+
+```{r, eval=FALSE}
+
+ggplot(data = <DATA>) + 
+    GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+
+```
+
+####Exercises
+
+`glimpse()` lets you quickly look at the # of rows and columns in a dataset
+
+```{r, eval=TRUE}
+
+#empty graph
+ggplot(data = mpg)
+
+str (mpg) # rows # columns
+
+# mpg$drv variable is type of drive in the cars, front (f), 4 (4wd) or rear (r) 
+
+```
+
+Scatterplot of hwy vs cyl
+
+```{r}
+
+
+ggplot(data = mpg)+
+  geom_point(mapping = aes(hwy, cyl))
+
+```
+
+Scatterplot of class vs drv
+
+```{r}
+
+ggplot(data = mpg)+
+  geom_point(mapping = aes(class, drv))
+
+```
+
+Both unuseful due to low number of points and being categorical variables, scatterplot shows relationship between continuous variables. 
+
+## Aesthetics
+
+A visual property of the objects in our graph. 
+If we assign a graphical property to class of car in `mpg` graph of `hwy vs. displ` we can see if there are differences according to class (compact, SUV, pickup)
+
+Assigning a unique level of aesthetic to each different value in the variable is known as **scaling**.
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+ Legends do not need to be specified if they can be inferred by `R` directly from the input.
+ 
+Scale of the graph is automatically generated. 
+ 
+If mapped to size, points size will change according to `class` variable
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+```
+
+Mapped to `shapes` and `alpha` (transparency)
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+# maximun 6 shapes, SUVs disappeared
+
+```
+
+Aestethics can be mapped manually to an arbitrary value. This is done outside `aes()` in the following way
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color= "red")
+
+```
+
+#### Exercises
+
+```{r}
+# types of variables inside mpg
+str(mpg)
+
+# Continuous variable to color produces an scale of the same color varying in intensity 
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color=cty))
+
+# Continuous variable to size produces a continually increasing size, proportional to value
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size=cty))
+
+# map same variable to multiple aesthetics
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size=displ))
+
+
+#stroke aesthetic just changes volume of borders
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, stroke=1))
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, stroke=3))
+
+# If you input a conditional statement for an aesthetic, it will assign levels accordingly 
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color=displ<5))
+
+
+```
+
