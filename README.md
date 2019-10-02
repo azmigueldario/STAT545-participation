@@ -7,8 +7,9 @@ Public repo available in my page.  [Link here.](https://github.com/azmigueldario
 
 ****
 
-![](https://cdn.pixabay.com/photo/2016/11/29/04/19/beach-1867285_960_720.jpg)\
+![](https://cdn.pixabay.com/photo/2016/11/29/04/19/beach-1867285_960_720.jpg)
 
 > Still waters run deep (*Laurentius Abstemius, 1940*)
 
 
+Plop
