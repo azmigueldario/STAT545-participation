@@ -1,0 +1,38 @@
+---
+title: "02102019-Introduction to Git Sync"
+author: "MDP"
+date: "10/2/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Create a Git controlled project
+
+Just link to a repo in Github while creating new project.
+A new tab named Git will be associated with this project
+
+
+**_Pull_** brings data from the remote version (online)
+
+**_Commit_** lets you save changes before trying to merge in remote location
+
+**_Push_** is the intent to merge your local data with remote data
+
+**_Branch button_** lets you work in a local branch before pushing to merge
+
+
+### Disaster recovery
+
+- Commit often
+- Push often
+- Github remote is your worst case scenario */ Plan B
+
+In case all goes wrong:\
+\
+1. Save all files in a safe place different from local repo
+1. Rename local repo
+1. Clone github repo again
+1. Copy all additional files back, try to commit and push
