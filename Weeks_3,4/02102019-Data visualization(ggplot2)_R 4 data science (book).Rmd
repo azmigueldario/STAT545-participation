@@ -193,6 +193,139 @@ ggplot(data = mpg) +
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, color=displ<5))
 
+```
 
+## Facets
+
+Instead of adding variables to **aesthetics**, you can visualize them as different graphs. **Facets** allows to split plots. 
+
+To use facet in a single variable use `facet_wrap(~ <Variable name>)`.
+
+In the following example is according to `class` variable (needs to be categorical or discrete)
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+
+# nrow divides graphs in 2 rows, optional
+# ncol can be used to specify # of columns
+```
+
+If needs to be a combination of variables use `facet_grid (<Variable 1> ~ <Variable 2>)`
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv~ class)
+```
+
+- Overall, facets facilitate interpretation as you may judge conditions individually. It also focuses your attention to the item at hand. 
+- Especially useful if high number of observations to avoid overlap. 
+- A single graph with different aestethics may facilitate graphical comparison
+
+#### Exercises
+
+Facet in a numerical variable
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~cty)
+
+# changes to categorical and creates a graph for each category
+```
+
+Replacing one of the values inside `facet_grid (x ~ y)` for ` . ` ignores that axis in the facet (division). See example first for x-axis and then for y-axis. 
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ drv)
+
+```
+
+## Geometric objects
+
+A **geom** is what a plot uses to represent data: bins, boxes, lines, smotth lines, etc.
+
+All `geom` in ggplot require `mapping` and `aestethics`. 
+
+- All aestethics are not compatible with all **geoms** 
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(  mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg) + 
+  geom_smooth(  mapping = aes(x = displ, y = hwy))
+
+# A representation with dots or with a smooth fitted line
+```
+
+A smooth line can assign a different type of line aestethic to a variable. It cannot fit a shape.  
+
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(  mapping = aes(x = displ, y = hwy, linetype= drv))
+
+```
+
+Some `geoms` use a single object to display different rows of data. You can group them by using the aestethic `group`
+
+```{r}
+              
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, group = drv))
+
+# group does not add a legend    
+
+ggplot(mpg) +
+  geom_smooth(
+    mapping = aes(displ, hwy, color = drv))
+
+
+# You can expect r to recognize data=mpg, x=displ & y=hwy 
+
+# remember to always specify uncommon arguments
+```
+
+You can add multiple _geom_ to the same plot. Each one represents a layer. 
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+```
+
+You can map aestethics directly to the `ggplot()` call in the first layer. Different layers will use  this mapping. 
+
+```{r}
+
+ggplot(data=mpg, mapping = aes(x=displ, y=hwy)) + 
+  geom_point() +
+  geom_smooth()
+
+```
+
+You can add different aestethics in secondary layers.
+
+```{r}
+ggplot(data=mpg, mapping = aes(x=displ, y=hwy)) + 
+  geom_point(mapping = aes(color=class)) +
+  geom_smooth()
+
+# or use different data
+
+ggplot(data=mpg, mapping = aes(x=displ, y=hwy)) + 
+  geom_point(mapping = aes(color=class)) +
+  geom_smooth( data = filter(mpg, class=="subcompact"), se=FALSE)
+
+# se defines if confidence interval is displayed
 ```
 
