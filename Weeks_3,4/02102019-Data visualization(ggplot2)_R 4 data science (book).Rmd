@@ -326,6 +326,301 @@ ggplot(data=mpg, mapping = aes(x=displ, y=hwy)) +
   geom_point(mapping = aes(color=class)) +
   geom_smooth( data = filter(mpg, class=="subcompact"), se=FALSE)
 
-# se defines if confidence interval is displayed
+# se defines if standard error shadow is displayed together with fitted line
+```
+
+#### Exercises
+
+`show.legend = FALSE` avoids legend .
+
+Recreate different types of graphs in the mpg data
+
+```{r}
+
+#1
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth(se=FALSE, color="blue")
+
+#2
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth(mapping = aes(line=drv), se=FALSE, color="blue")
+
+#3
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color=drv)) + 
+  geom_point() + 
+  geom_smooth(se=FALSE)
+
+#4
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color=drv)) + 
+  geom_smooth(se=FALSE)
+
+
+#5
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color=drv)) + 
+  geom_smooth(mapping = aes(linetype=drv), se=FALSE)
+
+#6
+ggplot(mpg, mapping = aes(displ, hwy)) + 
+  geom_point(size=3, color="white") + 
+  geom_point(mapping = aes(color=drv))
+
+
+```
+
+
+## Statistical transformations
+
+- `Diamonds` data set includes information about 54000 diamonds and their different qualities `(cut, price, carat or weight, clarity and color)` 
+
+```{r}
+
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut))
+
+#Y axis represents counts or number of diamonds in the cut category, a variable not included in dataset
+
+table(diamonds$cut)
+```
+
+- Bars graph need to calculate new values, in this case the ` counts ` of each `cut` type.
+
+- This process is called a **`stat`** or data transformation. You can see the pre-specified stat of a function in the **help section**. `?geom_bar`
+
+
+- **Stats**  can be used interchangeably with **geom**. They are related by their default association. 
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y=..prop.., group=1))
+
+#group in proportions is just a dummy variable so it does not calculate proportions in each strata
+
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+
+# summarizes the transformation (range and median)
+
+```
+
+
+#### Exercises
+
+- Same summary graph with default **geom**
+
+```{r}
+
+ggplot(data = diamonds) + 
+  geom_pointrange(mapping = aes(x = cut, y = depth) , stat = "summary")
+
+# default summary is mean and sd
+
+ggplot(data = diamonds) + 
+  geom_pointrange(mapping = aes(x = cut, y = depth) , stat = "summary",
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median)
+```
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_col(mapping = aes(x = cut, y = depth))
+
+# geom_col used identity of the y-axis variable as stat to construct bars
+```
+
+- The *`geom_`* and *`stat_`* associated by default usually share same name  
+
+- If you do not input `group` in geom_bar, it will count each bar and compare it with itself. Each bar will be 100% 
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+
+```
+
+- With the `fill` aesthetic, the heights of the bars need to be normalized.
+
+- In the example we'll normalize the 
+
+```{r}
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
+
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y= ..count../sum(..count..), fill = color))
+```
+
+## Position adjustment
+
+
+- Bar charts can have different border colors with `color` aestethic or filled with color using `fill`. They can even be combined.  
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+
+```
+
+- Stacking is automatical. it depens on the position argument.
+
+- Default is `position="identity"` which overlaps in a bar plot. (If color is transparent (alpha), you can see the effect)
+
+- Compare it with `position="fill"` which makes every bar the same highness, facilitating comparisson of percentages along the X-axis
+
+- Dodge option puts overlapping objects inmediately beside the other 
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+```
+
+**Jitter** can be used in other **geom** to avoid overlapping. It adds a small amount of random noise in the graph so you can see the bulk of dots in a scatterplot.  
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(displ, hwy))
+
+# compare
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(displ, hwy), position = "jitter")
+```
+
+#### Exercises
+
+**_geom_jitter_** variation can be specified with width= or height=
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +   geom_point()
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +   geom_point() +
+  geom_jitter(width = 0.25)
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +   geom_point() +
+  geom_jitter(height = 14)
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +   geom_point() +
+  geom_jitter(width = 2, height = 0)
+
+```
+
+- If you use *jitter*, the exact position will slightly change. If you use **_geom_count_** it will adjust the size of the dot according to the count. 
++ It can overlap if counts are too big
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_count()
+```
+
+
+- A box plot is used to show distribution across groups. 
+
++ `Position=dodge2` moves boxplots in a horizontal way only
+
++ It will separate horizontally any difference between X-axis variable.  
+
+```{r}
+?geom_boxplot()
+
+table(mpg$cty)
+
+ggplot(mpg, mapping = aes(hwy, cty))+
+  geom_boxplot(aes(group=cut_width(hwy, 5))) 
+
+# can be used with a continuous variable but you have to input a cut to the width like in previous example
+
+ggplot(mpg, mapping = aes(class, hwy, color=drv))+
+  geom_boxplot() 
+
+```
+
+## Coordinate systems
+
+Determine the coordinate system (cartesian) where the graph is located. 
+
+- `coord_flip` switches X and Y axis
+
+```{r}
+
+ggplot(mpg, mapping = aes(class, hwy, color=drv))+
+  geom_boxplot() +
+  coord_flip()
+```
+
+- `labs` assign a text label as indicated in the following
++ Assigns label to X and Y initial specification, even if flipped
+
+```{r}
+ggplot(mpg, mapping = aes(class, hwy)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(
+    y = "Highway MPG",
+    x = "Class",
+    title = "Highway MPG by car class",
+    subtitle = "1999-2008",
+    caption = "Source: http://fueleconomy.gov"
+  )
+
+# optional, you can add less 
+ggplot(mpg, mapping = aes(class, hwy)) +
+  geom_boxplot() +
+  labs(
+    y = "Highway MPG",
+    x = "Class of car",
+    title = "Highway MPG by car class"
+  )
+
+```
+
+- `?coord_fixed` creates a standar ratio of 1 between X and Y axis
+- `geom_abline()` shows a lineal relationship with slope 1 and intercept 0 as defaults
+
+```{r}
+?geom_abline()
+
+
+p <-  ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() +
+  geom_abline() 
+
+# with and without fixed ratio of coordinates
+
+p
+
+p + coord_fixed()
+```
+
+## Layered grammar of graphs
+
+
+```{r, eval=F, echo=T}
+
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <COORDINATE_FUNCTION> +
+  <FACET_FUNCTION>
 ```
 
