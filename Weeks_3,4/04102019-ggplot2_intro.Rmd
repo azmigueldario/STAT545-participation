@@ -38,7 +38,7 @@ ggplot(gapminder, aes(gdpPercap, lifeExp)) +
   ylab("Life Expectancy")
 ```
 
-#### Exercise 1: Bar Chart Grammar (Together)
+### Exercise 1: Bar Chart Grammar (Together)
 
 ```{r load packages, warning = FALSE}
 suppressPackageStartupMessages(library(tidyverse))
@@ -112,19 +112,108 @@ ggplot(gapminder, aes(gdpPercap, lifeExp)) +
 
 - A `theme` adds some visual characteristics to the graph
     + Through `ylab`, you can specify the name of the Y axis label
-        + Same for` xlab` but it was already entered in the scale
+        + Same for` xlab` but it was already entered in the scale layer
     + To avoid repeating the code line, I save it in an R object
 
 ```{r}
 
 plot<- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
   geom_point(alpha = 0.1) +
-  scale_x_log10("GDP per capita", labels = scales::dollar_format())
+  scale_x_log10("GDP per capita", labels = scales::dollar_format()) +
+  ylab("Life Expectancy")
 
 plot + theme_dark()
-plot + theme_bw()
-plot + theme_void()
-plot + theme_minimal()
+# plot + theme_bw()
+# plot + theme_void()
+# plot + theme_minimal()
 
 ```
     
+### Exercise 2
+
+The following is a tsibble (a special type of tibble containing time series data, which we'll see more of later), stored in the variable `mauna`, of `CO$_2$` concentrations collected monthly at the Mauna Loa station.
+
+Execute this code to store the data in `mauna`:
+
+```{r}
+(mauna <- tsibble::as_tsibble(co2) %>% 
+   rename(month = index, conc = value))
+```
+
+##### 2(a)
+
+Produce a line chart showing the concentration over time. Specifically, the plot should have the following grammar components:
+
+| Grammar Component     | Specification |
+|-----------------------|---------------|
+| __data__              | `mauna` |
+| __aesthetic mapping__ | x: month, y: conc |
+| __geometric object__  | lines |
+| scale                 | linear |
+| statistical transform | none |
+| coordinate system     | rectangular |
+| facetting             | none |
+
+Fill in the blanks to obtain the plot:
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(month, conc)) +
+  geom_line(color="blue") + 
+  ylab("Concentration") +
+  xlab("Months")
+```
+
+##### 2(b)
+
+It turns out that you're allowed to specify the aesthetic mappings in a `geom` layer instead of, or in addition to, in the `ggplot()` function, with the following rules:
+
+- Aesthetics appearing in a `geom` layer apply only to that layer.
+- If there are conflicting aesthetics in both the `ggplot()` function and the `geom` layer, the `geom` layer takes precedence.
+
+The following code mistakenly puts the month variable on the y-axis. Fill in the geom aesthetic so that you still obtain the same result as above.
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(y = month)) +
+  geom_line(aes(month, conc)) 
+```
+
+##### 2(c)
+
+You can store the output of the plot in a variable, too. Store the plot from 2(a) in the variable named `p`, then add a layer to `p` that adds green points to the plot.
+
+```{r, fig.width = 5, fig.height = 2}
+p <- ggplot(mauna, aes(month,conc)) +
+  geom_line() 
+
+p + geom_point(color="green")
+```
+
+##### 2(d)
+
+What's wrong with the following code? Fix it.
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(gapminder) +
+  geom_point(x = gdpPercap, y = lifeExp, alpha = 0.1)
+
+ggplot(gapminder) +
+  geom_point(aes(x = gdpPercap, y = lifeExp), alpha = 0.1)
+
+```
+
+
+##### 2(e) BONUS
+
+So you're a ggplot2 pro? Then, let's see this plot adapted to polar coordinates. Specifically:
+
+- angle is month (January through December)
+- radius is CO$_2$ concentration
+
+The plot should look like a spiral, or concentric circles. 
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(month,conc)) +
+  geom_line() + 
+  coord_polar(theta ="x")
+# ?coord_polar
+```
