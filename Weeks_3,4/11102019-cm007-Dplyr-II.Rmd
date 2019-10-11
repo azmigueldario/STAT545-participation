@@ -1,0 +1,144 @@
+---
+title: "cm007 Exercises: Practice with `dplyr`"
+output: 
+  html_document:
+    keep_md: true
+    theme: paper
+    toc: true
+editor_options: 
+  chunk_output_type: console
+---
+
+<!---The following chunk allows errors when knitting--->
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE, warning = FALSE)
+```
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tsibble))
+```
+
+### Group_by ()
+
+
+- **`group_by()`** groups a tibble according to the instruction\
+
+    + _Operations you do on a grouped tibble are done independently in each group_
+    + Inside `group_by` you can define a new variable and use it to subset
+
+```{r}
+gapminder %>% 
+  group_by(continent, year)
+# Dataframe is not rearranged, grouping appears over output
+
+gapminder %>% 
+  group_by(smallLifeExp = lifeExp < 60)
+```
+
+### Summarize ()
+
+**`Summarize()`** creates new columns too. However, the results of the calculations are collapsed to _only 1 value_\
+
+- `Summarize` respects previous grouping
+        + Results are presented according to the order in which grouping variables where entered\
+        
+- - `Summarize` also drops any variable not used in calculations
+
+```{r}
+gapminder %>% 
+  summarize(mu    = mean(lifeExp),
+            sigma = sd(lifeExp))
+
+gapminder %>% 
+  group_by(continent, year) %>% 
+  summarize(mu    = mean(lifeExp),
+            sigma = sd(lifeExp))
+
+ # compare against different order
+gapminder %>% 
+  group_by(year, continent) %>%   
+  summarize(mu    = mean(lifeExp),
+            sigma = sd(lifeExp))
+
+```
+
+- `dplyr::n()` summarizes the number of rows in each group
+
+```{r}
+gapminder %>% 
+  group_by(country) %>% 
+  summarize(n = n())
+```
+
+-`dplyr::count()` just counts the number of observations according to a variable
+
+```{r}
+gapminder %>% 
+  count(country)
+```
+
+### Grouped mutate
+
+- `lag()` evaluates the argument inmediately prior in the list according to the grouping variable
+
+```{r}
+gap_inc <- gapminder %>% 
+  arrange(year) %>% 
+  group_by(country) %>%
+  mutate(gdpPercap_inc = gdpPercap - lag(gdpPercap))
+
+DT::datatable(gap_inc)
+# remember datatable presents data in a nice way
+```
+
+- `Mutate` is ideal for vectorized calculations: `mean(), cos(), round()`\
+
+    + Also for window functions `lag(), rank()` that use all data available in a given vector for calculation
+
+## Worksheet
+
+This worksheet contains exercises aimed for practice with `dplyr`. 
+
+
+1. (a) What's the minimum life expectancy for each continent and each year? (b) Add the corresponding country to the tibble, too. (c) Arrange by min life expectancy.
+
+
+2. Calculate the growth in population since the first year on record _for each country_ by rearranging the following lines, and filling in the `FILL_THIS_IN`. Here's another convenience function for you: `dplyr::first()`. 
+
+```
+mutate(rel_growth = FILL_THIS_IN) %>% 
+arrange(FILL_THIS_IN) %>% 
+gapminder %>% 
+DT::datatable()
+group_by(country) %>% 
+```
+
+```{r}
+
+```
+
+
+3. Determine the country that experienced the sharpest 5-year drop in life expectancy, in each continent, sorted by the drop, by rearranging the following lines of code. Ensure there are no `NA`'s. Instead of using `lag()`, use the convenience function provided by the `tsibble` package, `tsibble::difference()`:
+
+```
+drop_na() %>% 
+ungroup() %>% 
+arrange(year) %>% 
+filter(inc_life_exp == min(inc_life_exp)) %>% 
+gapminder %>% 
+mutate(inc_life_exp = FILL_THIS_IN) %>% 
+arrange(inc_life_exp) %>% 
+group_by(country) %>% 
+group_by(continent) %>% 
+knitr::kable()
+```
+
+```{r}
+
+```
+
+
+
