@@ -98,12 +98,94 @@ DT::datatable(gap_inc)
 
     + Also for window functions `lag(), rank()` that use all data available in a given vector for calculation
 
+
+`drop_na()` drops any row that has an NA value, in this case all those corresponding to year 1952
+
+```{r}
+gap_inc %>% tidyr::drop_na()
+
+```
+ 
+### Using lubridate
+
+Allows easy handling of dates
+
+```{r}
+lubridate::mdy("September 24, 2019")
+lubridate::mdy("Sep 24 2019")
+lubridate::mdy("9-24-19")
+lubridate::dym(c("24-2019, September", "25 2019 Sep"))
+#Notice that they display the dates all in ymd format, which is best for computing because the dates sort nicely this way.
+
+lubridate::ymd("2019 September 24") %>% 
+  class()
+# You can tag on hms, too:
+lubridate::ymd_hms("2019 September 24, 23:59:59")
+
+```
+
+Other date functions in the 'tsibble' package
+
+```{r}
+tsibble::yearmonth("2019 September 24")
+tsibble::yearweek("2019 September 24")
+```
+
+### Tsibble dataframes
+
+Used for data that contains time series, compare it as tibble and tsibble
+
+- It determines the intervals between values
+    + Avoid hidden NA with fill_gaps()
+    
+```{r}
+energy <- read_csv("daily_consumption.csv")
+
+energy
+
+(energy <- as_tsibble(energy, index=date))
+# ordered
+
+(energy <- fill_gaps(energy))
+```
+
+Gapminder as a tsibble 
+
+```{r}
+gapminder %>% 
+  as_tsibble(index = year, key = country)
+# Key informs grouping
+```
+
+Grouping a tsibble needs the index_by instead of group_by
+
+- Can use functions from the lubridate package
+
+```{r}
+require(lubridate)
+
+energy %>% 
+  tsibble::index_by(day_of_year = yday(date)) %>% 
+  dplyr::summarize(mean_intensity = mean(intensity, na.rm = TRUE))
+```
+
+
 ## Worksheet
 
 This worksheet contains exercises aimed for practice with `dplyr`. 
 
 
 1. (a) What's the minimum life expectancy for each continent and each year? (b) Add the corresponding country to the tibble, too. (c) Arrange by min life expectancy.
+
+```{r}
+
+gapminder %>% 
+  group_by(continent, year) %>% 
+  summarize(minlife=min(lifeExp),
+          country=country[lifeExp==minlife]) %>%
+  arrange(minlife)
+
+```
 
 
 2. Calculate the growth in population since the first year on record _for each country_ by rearranging the following lines, and filling in the `FILL_THIS_IN`. Here's another convenience function for you: `dplyr::first()`. 
@@ -117,7 +199,13 @@ group_by(country) %>%
 ```
 
 ```{r}
+gapminder %>% 
+  group_by(country) %>% 
+  arrange(year) %>% 
+  mutate(rel_growth =  pop - first(pop)) %>%
+  DT::datatable()
 
+# first takes the first value in the dataset or according to groups
 ```
 
 
@@ -137,6 +225,15 @@ knitr::kable()
 ```
 
 ```{r}
+gapminder %>% 
+  group_by(country) %>%
+  arrange(year) %>% 
+  mutate(inc_life_exp = difference(lifeExp)) %>%
+  drop_na() %>% 
+  ungroup() %>% 
+  group_by(continent) %>% 
+  filter(inc_life_exp == min(inc_life_exp)) %>% 
+  arrange(inc_life_exp)
 
 ```
 
