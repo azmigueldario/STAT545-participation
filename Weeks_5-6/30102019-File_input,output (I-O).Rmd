@@ -1,0 +1,22 @@
+---
+title: "cm011-File input/Output (I/O)"
+output: 
+  html_document:
+    toc: true
+    theme: flatly
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(
+  warning = FALSE, error = TRUE, message = FALSE)
+```
+
+### General concepts
+
+- _Surprise me!_ is the best idea, a lot of cleanining and mingling is expected every time you import a dataset.
+- **_Try to make the most out of your importing function_**
+- Export to known and simple text files
+
+### read

@@ -1,0 +1,71 @@
+---
+title: "cm010 Exercises: Tibble Joins"
+output: 
+  html_document:
+    toc: true
+    theme: paper
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(
+  warning = FALSE, error = TRUE, message = FALSE)
+```
+
+## Join tibbles
+
+Databases are usually presented divided in multiple tables related through some key variable. This is named relational databases. 
+```{r}
+browseVignettes("dplyr") # two-table verbs
+require(tidyverse)
+```
+
+If you use `bind`, the rows or columns will be coerced in order, independently of match. **Beware**
+
+### Mutating joins
+
+Add new columns to the tibble. 
+- Match databases according to their *variables* and add new variables (columns).
+- They return `NA` to fill remaining rows, depending on type of merge.
+-`by=` can specify variables to use for match, e.g. `by="mangaka"` or `by=c('mangaka'='author')`
+
+#### Types of mutating joins
+
+1. `inner_join (x,y)` includes only observations with match in both
+2. `left_join (x,y)` returns all observations in **x**
+3. `right_join (x,y)` is similar but keeps all in **y**
+4. `full_join (x,y)` keeps all rows of both
+```{r}
+df1 <- tibble(x = c(1, 2), y = 2:1)
+df2 <- tibble(x = c(1, 3), a = 10, b = "a")
+
+df1 %>% inner_join(df2) 
+
+df1 %>% left_join(df2) 
+
+df1 %>% right_join(df2) 
+
+df1 %>% full_join(df2) 
+```
+
+### Filtering joins
+
+They join `tibbles or tables` based on variables but affect mainly the observations (rows usually) instead of.
+- Filtering joins never duplicate data. 
+- `semi_join(x,y)` returns all the rows in x that **match** y
+- `anti_join(x,y)` return all the rows in x **without a match** in y
+```{r}
+df1 <- tibble(x = c(1, 1, 3, 4), 
+              y = 1:4)
+df2 <- tibble(x = c(1, 1, 2), 
+              z = c("a", "b", "a"))
+
+df1 %>% nrow() # Four rows to start with
+
+df1 %>% inner_join(df2, by = "x") # And we get four rows after the join
+
+df1 %>% semi_join(df2, by = "x") ## But only two rows actually match
+```
+
+_**Joins** are conservative, if a **factor variable** doesn't have the same levels and in the same order_ 
