@@ -1,0 +1,219 @@
+---
+title: "Ggplot2"
+author: "MDP"
+date: "10/4/2019"
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(error = TRUE)
+```
+
+# Ggplot2 usage
+
+Set up workspace
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+
+required <- c('tidyverse', 'gapminder', 'scales')
+lapply(required, library, character=T)
+
+```
+
+### Example
+
+```{r}
+require(gapminder)
+
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+  geom_point(alpha = 0.1) +
+  scale_x_log10("GDP per capita", labels = scales::dollar_format()) +
+  theme_bw() +
+  ylab("Life Expectancy")
+```
+
+### Exercise 1: Bar Chart Grammar (Together)
+
+```{r load packages, warning = FALSE}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(tsibble))
+
+```
+
+<!---The following chunk allows errors when knitting--->
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+Consider the following plot. Don't concern yourself with the code at this point.
+
+```{r, fig.width = 5, fig.height = 2}
+gapminder %>% 
+  filter(year == 2007) %>% 
+  mutate(continent = fct_infreq(continent)) %>% 
+  ggplot(aes(continent)) +
+  geom_bar() +
+  theme_bw()
+
+# ?fct_infreq organizes a factor according to frequencies
+```
+
+Fill in the seven grammar components for this plot.
+
+| Grammar Component     | Specification |
+|-----------------------|---------------|
+| __data__              | `gapminder` |
+| __aesthetic mapping__ | X=continent, y=counts |
+| __geometric object__  | Bars   |
+| scale                 | None   |
+| statistical transform | Counts |
+| coordinate system     | Cartesian plane |
+| facetting             | None   |
+
+## Mapping inside ggplot
+
+Ggplot function uses the `data` argument and the mapping of variables through aestethics `aes(x=x, y=y)` function used also as `mapping=aes()`
+
+```{r}
+ggplot(gapminder, aes(gdpPercap, lifeExp))
+
+ggplot(gapminder, mapping=aes(gdpPercap, lifeExp))
+
+```
+
+- Just initializes the plot, have to include what type of graph you want with a geometric or `geom_SOMETHING`
+    + Each layer is added with a **`+`** symbol
+    + Alpha is an additional `aestethic` representing transparency
+
+```{r}
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+  geom_point(alpha = 0.1) 
+
+```
+
+- A scale transformation is done using **`scale_AESTHETIC_TRANSFORM()`**
+    + In this case we scaled it to Log10 and use a label of dollar format
+    
+```{r}
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+  geom_point(alpha = 0.1) +
+  scale_x_log10("GDP per capita", labels = scales::dollar_format())
+```
+
+- A `theme` adds some visual characteristics to the graph
+    + Through `ylab`, you can specify the name of the Y axis label
+        + Same for` xlab` but it was already entered in the scale layer
+    + To avoid repeating the code line, I save it in an R object
+
+```{r}
+
+plot<- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+  geom_point(alpha = 0.1) +
+  scale_x_log10("GDP per capita", labels = scales::dollar_format()) +
+  ylab("Life Expectancy")
+
+plot + theme_dark()
+# plot + theme_bw()
+# plot + theme_void()
+# plot + theme_minimal()
+
+```
+    
+### Exercise 2
+
+The following is a tsibble (a special type of tibble containing time series data, which we'll see more of later), stored in the variable `mauna`, of `CO$_2$` concentrations collected monthly at the Mauna Loa station.
+
+Execute this code to store the data in `mauna`:
+
+```{r}
+(mauna <- tsibble::as_tsibble(co2) %>% 
+   rename(month = index, conc = value))
+```
+
+##### 2(a)
+
+Produce a line chart showing the concentration over time. Specifically, the plot should have the following grammar components:
+
+| Grammar Component     | Specification |
+|-----------------------|---------------|
+| __data__              | `mauna` |
+| __aesthetic mapping__ | x: month, y: conc |
+| __geometric object__  | lines |
+| scale                 | linear |
+| statistical transform | none |
+| coordinate system     | rectangular |
+| facetting             | none |
+
+Fill in the blanks to obtain the plot:
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(month, conc)) +
+  geom_line(color="blue") + 
+  ylab("Concentration") +
+  xlab("Months")
+```
+
+##### 2(b)
+
+It turns out that you're allowed to specify the aesthetic mappings in a `geom` layer instead of, or in addition to, in the `ggplot()` function, with the following rules:
+
+- Aesthetics appearing in a `geom` layer apply only to that layer.
+- If there are conflicting aesthetics in both the `ggplot()` function and the `geom` layer, the `geom` layer takes precedence.
+
+The following code mistakenly puts the month variable on the y-axis. Fill in the geom aesthetic so that you still obtain the same result as above.
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(y = month)) +
+  geom_line(aes(month, conc)) 
+```
+
+##### 2(c)
+
+You can store the output of the plot in a variable, too. Store the plot from 2(a) in the variable named `p`, then add a layer to `p` that adds green points to the plot.
+
+```{r, fig.width = 5, fig.height = 2}
+p <- ggplot(mauna, aes(month,conc)) +
+  geom_line() 
+
+p + geom_point(color="green")
+```
+
+##### 2(d)
+
+What's wrong with the following code? Fix it.
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(gapminder) +
+  geom_point(x = gdpPercap, y = lifeExp, alpha = 0.1)
+
+ggplot(gapminder) +
+  geom_point(aes(x = gdpPercap, y = lifeExp), alpha = 0.1)
+
+```
+
+
+##### 2(e) BONUS
+
+So you're a ggplot2 pro? Then, let's see this plot adapted to polar coordinates. Specifically:
+
+- angle is month (January through December)
+- radius is CO$_2$ concentration
+
+The plot should look like a spiral, or concentric circles. 
+
+```{r, fig.width = 5, fig.height = 2}
+ggplot(mauna, aes(month,conc)) +
+  geom_line() + 
+  coord_polar(theta ="x")
+# ?coord_polar
+```

@@ -1,0 +1,172 @@
+---
+title: "Tidy data"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    theme: paper
+---
+
+# Tidy Data
+
+In tidy data:
+-Each variable forms a column.
+-Each observation forms a row.
+-Each cell contains a value
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE, warning = FALSE)
+```
+
+```{r}
+browseVignettes("tidyr")
+```
+
+## Pivoting
+### Pivot_longer
+
+`pivot_longer` makes datasets longer by increasing the number of rows and decreasing the number of columns.
+
+- `cols` column names to be modified
+- `names_to` old column names are going to a new column. What is the name(s) of the(se) new columns?
+- `values_to` similar but with data contained in value cells, what is the name of the(se) new columns
+```{r, message=FALSE}
+require(tidyverse)
+
+relig_income
+relig_income %>% 
+  pivot_longer(cols = -religion, 
+               names_to = "income", 
+               values_to = "count")
+```
+
+- `names_prefix` specifies a character string to remove from start of each variable name
+- `names_ptypes = list()` changes variable types
+```{r}
+billboard
+billboard %>% 
+  pivot_longer(
+    cols = starts_with("wk"), 
+    names_to = "week", 
+    values_to = "rank",
+    values_drop_na = TRUE
+  )
+
+billboard %>% 
+  pivot_longer(
+    cols = starts_with("wk"), 
+    names_to = "week", 
+    names_prefix = "wk",
+    names_ptypes = list(week = integer()),
+    values_to = "rank",
+    values_drop_na = TRUE,
+  )
+```
+
+- `names_pattern` can be used when a column contains multiple values. 
+    + `new_?` ignores the string
+```{r}
+who
+who %>% 
+  pivot_longer(
+  cols = new_sp_m014:newrel_f65,
+  names_to = c("diagnosis", "gender", "age"),
+  names_pattern = "new_?(.*)_(.)(.*)",
+  values_to = "count"
+)
+# ?tidyr::extract
+```
+
+When multiple observations are included per row
+- Use **`.value`**: specify whic part of the column name will remain as a column (variable) 
+    + In this case, `names_pattern` or `names_sep` defines which corresponds to `.value` and `set`
+```{r}
+anscombe
+anscombe %>% 
+  pivot_longer(everything(), 
+    names_to = c(".value", "set"), 
+    names_pattern = "(.)(.)"
+  ) %>% 
+  arrange(set)
+```
+
+### Pivot_wider
+
+Makes a dataset wider by increasing the number of columns and decreasing the number of rows. 
+
+- `id_cols=` what you want to keep as it is
+- `names_from=`Here you specify from what column do the new column names come , can be multiple columns
+- `values_from:` the values under the new columns are coming from an old column. Which column is this?
+```{r}
+fish_encounters
+fish_encounters %>% 
+  pivot_wider( id_cols = fish,
+    names_from = station,
+    values_from = seen)
+```
+
+- You can specify if new variables will include a transformation (data has 9 replication)
+```{r}
+warpbreaks <- warpbreaks %>% 
+  as_tibble() %>% 
+  select(wool, tension, breaks) %>%
+  print()
+warpbreaks %>% 
+  pivot_wider(
+    names_from = wool, 
+    values_from = breaks,
+    values_fn = list(breaks = mean)
+  )
+```
+
+## Making tibbles
+
+Cannot recycle and argument unless it is of length 1
+```{r}
+tibble(x = 1:6,
+       y = 1:2)
+```
+
+Using `tibble::tribble()`
+```{r}
+tribble(
+  ~Day, ~Breakfast,
+  1, "Apple",
+  2, "Yogurt",
+  3, "Yogurt"
+)
+```
+
+Can also nest dataframes inside columns
+```{r}
+(list_col <- tibble(n = 1:2,
+                    y = list(iris, mtcars)))
+
+(iris_nest <- iris %>% 
+  group_by(Species) %>% 
+  nest())
+```
+
+`expand_grid()` expands all possible combinations
+```{r}
+expand_grid(x = 1:2, y = 1:2, z = 1:2)
+```
+
+#### Hidden `NA`
+```{r}
+(df <- tibble(
+  year   = c(2010, 2010, 2010, 2010, 2012, 2012, 2012),
+  qtr    = c(   1,    2,    3,    4,    1,    2,    3),
+  return = rnorm(7)
+))
+```
+
+If we look at all the possible combinations, some `NA` appear
+```{r}
+df %>% 
+  expand(year, qtr) 
+
+df %>% 
+  complete(year, qtr) #makes explicit NA's
+```
+
+
