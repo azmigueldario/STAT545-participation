@@ -13,10 +13,82 @@ knitr::opts_chunk$set(
   warning = FALSE, error = TRUE, message = FALSE)
 ```
 
-### General concepts
+## General concepts
 
 - _Surprise me!_ is the best idea, a lot of cleanining and mingling is expected every time you import a dataset.
 - **_Try to make the most out of your importing function_**
 - Export to known and simple text files
+- _Modify data with commands_, is more functional in the long run
+- Create separated scripts with intermediate output files.
+    + Helps you start from intermediate steps
 
-### read
+## Readr package
+
+Readr does not convert string to factors automatically.\
+\
+Includes multiple `parse` functions, each works by column of imported data (heuristic guess).\
+\
+Base function is `read_delim()` with specific functions for text `read_tsv` and comma separated files `read_csv()`
+- Using these functions saves lots of time in cleaning data, **lots**
+
+```{r, eval=FALSE}
+browseVignettes("readr")
+# Introduction to readr
+```
+
+```{r}
+require(tidyverse)
+require(gapminder)
+require(here)
+```
+
+### Writing data to disk
+
+```{r}
+gap_asia_2007 <- gapminder %>% 
+  filter(year == 2007, continent == "Asia")
+gap_asia_2007
+```
+
+Write as `.csv`
+```{r}
+write_csv(gap_asia_2007,"exported_file.csv") #default location is wd of .rmd file
+
+```
+
+## **here** package
+
+When inside an `R.proj` file, the working directory is always at the level of the file.\
+\
+If you are working in a `.rmd` file. The working directory is where the file is located.
+- Create a separate `data` sub-directory\
+\
+`here::here()` shows your `wd` and can help you specify locations in relationship to it using strings
+
+```{r}
+here::here()
+# directory with my R.proj file
+here::here("data")
+```
+
+- Specify sub-folders by adding strings 
+```{r}
+here::here("data", "cm011_data", "05Nov2019")
+# not actually created unless you put some data in
+write_csv(gap_asia_2007,here::here("Weeks_5-6", "data.cm011", "exported_file.csv"))
+here()
+```
+
+- Using it with read functions
+```{r}
+read_csv(here::here("Weeks_5-6","data.cm011","exported_file.csv"))
+```
+
+### Reading data from the web
+
+Specify the path as the web URL
+```{r}
+url <- "http://gattonweb.uky.edu/sheather/book/docs/datasets/magazines.csv"
+read_csv(url)
+```
+

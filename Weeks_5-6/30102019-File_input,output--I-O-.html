@@ -385,18 +385,73 @@ summary {
 
 <div id="TOC">
 <ul>
-<li><a href="#importing-data">Importing data</a></li>
+<li><a href="#general-concepts">General concepts</a></li>
+<li><a href="#readr-package">Readr package</a><ul>
+<li><a href="#writing-data-to-disk">Writing data to disk</a></li>
+</ul></li>
+<li><a href="#here-package">here package</a></li>
 </ul>
 </div>
 
 <pre class="r"><code>knitr::opts_chunk$set(
   warning = FALSE, error = TRUE, message = FALSE)</code></pre>
-<div id="importing-data" class="section level2">
-<h2>Importing data</h2>
+<div id="general-concepts" class="section level2">
+<h2>General concepts</h2>
 <ul>
-<li><p><em>Surprise me!</em> is the best idea, a lot of cleanining and mingling is expected every time you import a dataset.</p></li>
-<li><p><em>Try to make the most out of your importing function</em></p></li>
+<li><em>Surprise me!</em> is the best idea, a lot of cleanining and mingling is expected every time you import a dataset.</li>
+<li><strong><em>Try to make the most out of your importing function</em></strong></li>
+<li>Export to known and simple text files</li>
+<li><em>Modify data with commands</em>, is more functional in the long run</li>
+<li>Create separated scripts with intermediate output files.
+<ul>
+<li>Helps you start from intermediate steps</li>
+</ul></li>
 </ul>
+</div>
+<div id="readr-package" class="section level2">
+<h2>Readr package</h2>
+<p>Readr does not convert string to factors automatically.<br />
+<br />
+Includes multiple <code>parse</code> functions, each works by column of imported data (heuristic guess).<br />
+<br />
+Base function is <code>read_delim()</code> with specific functions for text <code>read_tsv</code> and comma separated files <code>read_csv()</code></p>
+<pre class="r"><code>browseVignettes(&quot;readr&quot;)
+# Introduction to readr</code></pre>
+<pre class="r"><code>require(tidyverse)
+require(gapminder)</code></pre>
+<div id="writing-data-to-disk" class="section level3">
+<h3>Writing data to disk</h3>
+<pre class="r"><code>gap_asia_2007 &lt;- gapminder %&gt;% 
+  filter(year == 2007, continent == &quot;Asia&quot;)
+gap_asia_2007</code></pre>
+<pre><code>## # A tibble: 33 x 6
+##    country          continent  year lifeExp        pop gdpPercap
+##    &lt;fct&gt;            &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;      &lt;int&gt;     &lt;dbl&gt;
+##  1 Afghanistan      Asia       2007    43.8   31889923      975.
+##  2 Bahrain          Asia       2007    75.6     708573    29796.
+##  3 Bangladesh       Asia       2007    64.1  150448339     1391.
+##  4 Cambodia         Asia       2007    59.7   14131858     1714.
+##  5 China            Asia       2007    73.0 1318683096     4959.
+##  6 Hong Kong, China Asia       2007    82.2    6980412    39725.
+##  7 India            Asia       2007    64.7 1110396331     2452.
+##  8 Indonesia        Asia       2007    70.6  223547000     3541.
+##  9 Iran             Asia       2007    71.0   69453570    11606.
+## 10 Iraq             Asia       2007    59.5   27499638     4471.
+## # ... with 23 more rows</code></pre>
+<p>Write as <code>.csv</code></p>
+<pre class="r"><code>write_csv(gap_asia_2007,&quot;exported_file.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="here-package" class="section level2">
+<h2>here package</h2>
+<p>When inside an <code>R.proj</code> file, the working directory is always at the level of the file.</p>
+<p>If you are working in a <code>.rmd</code> file. The working directory is where the file is located.<br />
+<br />
+- Create a separate <code>data</code> sub-directory</p>
+<p><code>here::here()</code> can</p>
+<pre class="r"><code>here::here()</code></pre>
+<pre><code>## [1] &quot;C:/Users/mprieto/Documents/STAT545.participation&quot;</code></pre>
+<pre class="r"><code># directory with my R.proj file</code></pre>
 </div>
 
 
