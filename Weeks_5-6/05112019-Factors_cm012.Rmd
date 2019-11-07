@@ -1,0 +1,163 @@
+---
+title: "cm012 Exercises: Factors"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_depth: 4
+    theme: paper
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+```{r, message=FALSE, echo=FALSE}
+packages <- c(
+  "gapminder", 
+  "tidyverse", 
+  "forcats",
+  "ggplot2")
+lapply(packages, require, character.only = TRUE)
+```
+
+## Motivating the need for factors in R
+
+Factors are how we store categorical variables in `R`.\
+\
+The values a factor can take are called **levels** and are showed as strings ("Colombia", "Venezuela") altough each *level* is really assigned a number: 1,2,3,etc.
+
+- Check your variables when something weard happens, use `class()`
+- Base read.csv(), read.table() and data.frame() change *strings* to *factors* by default
+
+### Forcats package
+
+Special package to handle factor related operations
+
+```{r}
+str(gapminder$continent)
+levels(gapminder$continent)
+nlevels(gapminder$continent)
+class(gapminder$continent)
+```
+
+```{r}
+fct_count(gapminder$continent)
+```
+
+Even if you drop multiple values in a factor variable, the levels do not change
+
+```{r}
+nlevels(gapminder$country)
+
+h_countries <- c("Egypt", "Haiti", "Romania", "Thailand", "Venezuela")
+h_gap <- gapminder %>% 
+  filter(country %in% h_countries)
+nlevels(h_gap$country)
+```
+
+```{r}
+# use of fct_drop () removes unused levels
+h_gap$country %>% 
+  fct_drop() %>% 
+  levels()
+```
+
+Factors are usually ordered alphabetically, you can change it accordingo to some principle
+
+-fct_infreq() orders by decreasing frequency
+-fct_rev() reverts the order
+
+```{r}
+gapminder$continent %>% 
+  fct_infreq() %>%
+  levels()
+
+# alphabetically but backwards
+gapminder$continent %>%
+  fct_rev() %>% 
+  levels()
+
+# increasing frequency
+gapminder$continent %>% 
+  fct_infreq() %>%
+  fct_rev() %>% 
+  levels()
+```
+
+- fct_reorder() lets you order factors according to other variable.
+    + Useful for better plots
+    + The default summarizing function parsed to the index variable is *median ()*
+    + Other function can be specified
+    
+```{r}
+fct_reorder(gapminder$country, gapminder$lifeExp)  %>%
+  levels() %>%
+  head()
+
+## order accoring to minimum life exp instead of median
+fct_reorder(gapminder$country, gapminder$lifeExp, min) %>% 
+  levels() %>%
+  head()
+
+## backwards median
+fct_reorder(gapminder$country, gapminder$lifeExp, .desc = TRUE) %>% 
+  levels() %>% 
+  head()
+```
+    
+- fct_Recode() changes the *string* assigned to levels in a factor
+
+```{r}
+i_gap <- gapminder %>% 
+  filter(country %in% c("United States", "Sweden", "Australia")) %>% 
+  droplevels()
+i_gap$country %>%
+  fct_recode("USA" = "United States", "Oz" = "Australia") %>% levels()
+
+i_gap <- gapminder %>% 
+  filter (country %in% c("Australia", "Korea, Dem. Rep.", "Korea, Rep.")) %>% 
+  droplevels()
+i_gap$country %>% 
+  fct_recode("Oz" = "Australia", "North Korea" ="Korea, Dem. Rep.", "South Korea"= "Korea, Rep.") %>% 
+  levels()
+
+```
+
+### Factors for plotting
+
+Use gapminder data from 1997 and create a new factor varaible based on life expectancy
+
+```{r}
+gapminder %>% 
+  filter(year==1997) %>% 
+  mutate(life_level = factor(case_when(
+    lifeExp < 48~ 'low',
+    lifeExp < 59 ~ 'moderate',
+    lifeExp < 70 ~ 'high',
+    TRUE ~ 'very high'))) %>%
+  ggplot() +
+  geom_boxplot(aes(x = life_level, y = gdpPercap)) +
+  labs(y = "GDP per capita, $", x= "Life expectancy level, years") +
+  theme_bw() 
+```
+
+In called to factor, we can set the levels we want and avoid droping levels in the X-axis.
+
+```{r}
+gapminder %>% 
+  filter(year == 1997) %>% 
+  mutate(life_level = factor(case_when(lifeExp < 23 ~ 'very low',
+                                lifeExp < 48~ 'low',
+                                lifeExp < 59 ~ 'moderate',
+                                lifeExp < 70 ~ 'high',
+                                TRUE ~ 'very high'),
+                levels = c("very low" , "low","moderate", "high","very high"))) %>%  
+  ggplot() + geom_boxplot(aes(x = life_level, y = gdpPercap)) +
+  labs(y = "GDP per capita, $", x= "Life expectancy level, years") +
+  theme_bw() +
+  scale_x_discrete(drop = FALSE)
+```
+
